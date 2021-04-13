@@ -10,7 +10,7 @@ from django_ratelimit.core import is_ratelimited
 __all__ = ['ratelimit']
 
 
-def ratelimit(group=None, key=None, rate=None, method=ALL, block=False):
+def ratelimit(group=None, key=None, rate=None, method=ALL, block=False, exception_kls=Ratelimited):
     def decorator(fn):
         @wraps(fn)
         def _wrapped(request, *args, **kw):
@@ -20,7 +20,7 @@ def ratelimit(group=None, key=None, rate=None, method=ALL, block=False):
                                          increment=True)
             request.limited = ratelimited or old_limited
             if ratelimited and block:
-                raise Ratelimited()
+                raise exception_kls()
             return fn(request, *args, **kw)
         return _wrapped
     return decorator
